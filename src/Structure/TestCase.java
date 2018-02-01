@@ -71,26 +71,29 @@ public class TestCase {
 		int failureCond = 0;
 		int fieldValInt = 0;
 		
+		String pass = "Passed";
+		String fail = "Failed";
 		
 		//SET THE DRIVER LOCATION 
 		
 		System.setProperty("webdriver.chrome.driver", "/home/devteam/Documents/AllDrivers/chromedriver");
-				//System.setProperty("webdriver.gecko.driver", "/home/devteam/Documents/AllDrivers/geckodriver");
+		System.setProperty("webdriver.gecko.driver", "/home/devteam/Documents/AllDrivers/geckodriver");
 		//INITIALIZE THE DRIVER
 		
-		WebDriver driver = new ChromeDriver();
-				//WebDriver driver = new FirefoxDriver();
+		//WebDriver driver = new ChromeDriver();
+				WebDriver driver = new FirefoxDriver();
 	
 		//ARRAY OF OBJECTS OF THE TEST CLASS
 		test[] testcase = new test[110];
 
-		File f = new File("/home/devteam/Documents/ExcelFiles/loadPage2.xls");
+		File f = new File("/home/devteam/Documents/ExcelFiles/loadPage.xls");
+		String filename = f.getName();
+		System.out.println("Result"+filename);
+		
 		FileInputStream fis = new FileInputStream(f);
 		HSSFWorkbook wb = new HSSFWorkbook(fis);
 		HSSFSheet sheet1 = wb.getSheetAt(0);
-		
-		FormulaEvaluator evaluator = wb.getCreationHelper().createFormulaEvaluator();
-		
+		HSSFSheet resultsheet1 = wb.cloneSheet(0);
 		
 		
 		int j=1, k=1, i=0;
@@ -135,9 +138,11 @@ public class TestCase {
 						if(status == true){
 							driver.get(testcase[i].field);
 							i = testcase[i].successCondition;
+							resultsheet1.getRow(i).getCell(8).setCellValue(pass);
 						}
 						else{
 							i = testcase[i].failureCondition;
+							resultsheet1.getRow(i).getCell(8).setCellValue(fail);
 						}
 						break;
 				
@@ -266,12 +271,6 @@ public class TestCase {
 		return ret;	
 	}
 }
-
-
-
-
-
-
 
 
 /*
