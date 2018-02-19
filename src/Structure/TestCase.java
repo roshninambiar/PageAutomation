@@ -2,9 +2,13 @@ package Structure;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -74,6 +78,8 @@ public class TestCase {
 		String pass = "Passed";
 		String fail = "Failed";
 
+			
+		
 		//SET THE DRIVER LOCATION 
 
 		System.setProperty("webdriver.chrome.driver", "/home/devteam/Documents/AllDrivers/chromedriver");
@@ -86,31 +92,50 @@ public class TestCase {
 		//ARRAY OF OBJECTS OF THE TEST CLASS
 		test[] testcase = new test[110];
 		
-		String file = "loadPage.xls";
-		String path = "/home/devteam/Documents/ExcelFiles/loadPage/"+file;
-		File f = new File(path);
-		
-
-		FileInputStream fis = new FileInputStream(f);
+		String filename = "loadPage.xls";
+		String path = "/home/devteam/Documents/ExcelFiles/src/"+filename;
+		File file = new File(path);
+			
+		FileInputStream fis = new FileInputStream(file);
 		HSSFWorkbook wb = new HSSFWorkbook(fis);
-		HSSFWorkbook resultwb = new HSSFWorkbook();
-		HSSFSheet sheet = wb.getSheetAt(0);
 		
-		String resultfile = "Result_"+f.getName();
-		File resultf = new File("/home/devteam/Documents/ExcelFiles/loadPage/"+resultfile);
-		FileUtils.copyFile(f, resultf);
 		
-		FileInputStream resfis = new FileInputStream(resultf);
-		HSSFWorkbook reswb = new HSSFWorkbook(resfis);
-		HSSFSheet ressheet = reswb.getSheetAt(0);
+		int totalsheetnum = wb.getNumberOfSheets();
+		System.out.println("Total sheets: "+totalsheetnum);
+		int currentsheetnum = 0;
+	
+		
+		while(currentsheetnum != (totalsheetnum)){
+		
+		HSSFSheet sheet = wb.getSheetAt(currentsheetnum);
+		System.out.println("r3c5 value: "+sheet.getRow(3).getCell(5).getCellFormula());
+		//System.out.println("r3c5 value: "+sheet.getRow(3).getCell(5).getStringCellValue());
+		r++;
+		//RETRIEVE CURRENT DATE AND TIME
+		DateTimeFormatter dtf = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");  
+		LocalDateTime timenow = LocalDateTime.now();  
+		String date = dtf.format(timenow);
+				
+		//CREATE RESULT FILE(copy of source file) AND APPEND DATE TO THE FILE NAME
+		String resultfilename = "Result_" + date + "_" + file.getName();
+		File resultfile = new File("/home/devteam/Documents/ExcelFiles/result/"+resultfilename);
+		FileUtils.copyFile(file, resultfile);
+		
+		FileInputStream resultfis = new FileInputStream(resultfile);
+		HSSFWorkbook resultwb =  new HSSFWorkbook(resultfis);
+		HSSFSheet resultsheet = resultwb.getSheetAt(0);
 		
 		//FileOutputStream fos = new FileOutputStream(resultf);
+		 
 
 		int j=1, k=1, i=0;
-
+		
+		//CALCULATING MAX NUMBER OF ROWS AND COLUMNS IN THE EXCEL SHEET
+		
 		int maxrow = sheet.getLastRowNum();
 		int maxcol = sheet.getRow(maxrow).getLastCellNum();
 
+		//RUNNING A LOOP FOR THE INPUT
 		while(j!=(maxrow+1)){
 			for(j=1; j<=maxrow; j++){
 				System.out.println(sheet.getRow(j).getCell(2)+" "+j);
@@ -124,6 +149,7 @@ public class TestCase {
 				HSSFCell cell = sheet.getRow(j).getCell(5);
 				CellType type = cell.getCellTypeEnum();
 
+				//CHECKS IF THE VALUE IN THE 'FIELD' IN SHEET IS A STRING OR A NUMBER AND CALLS APPROPRIATE CONSTRUCTOR
 				if(type == CellType.STRING){
 					fieldValString = sheet.getRow(j).getCell(5).getStringCellValue();
 					testcase[i] = new test(testAction, field, fieldRef, fieldValString, successCond, failureCond);
@@ -136,8 +162,6 @@ public class TestCase {
 
 				System.out.println(testAction+ field+ fieldRef+ fieldValString + fieldValInt+ successCond+ failureCond);
 
-
-				//ITERATE THE OBJECTS TILL TEST ACTION IS 'END' 
 				switch(testcase[i].testAction){
 
 				//LOADS THE PAGE BASED ON THE STATUS CODE 
@@ -148,15 +172,15 @@ public class TestCase {
 					if(status == true){
 						driver.get(testcase[i].field);
 						i = testcase[i].successCondition;
-						ressheet.getRow(i).getCell(8).setCellValue(pass);
+						resultsheet.getRow(i).createCell(8).setCellValue(pass);
 					}
 					else{
 						i = testcase[i].failureCondition;
-						ressheet.getRow(i).getCell(8).setCellValue(fail);
+						resultsheet.getRow(i).createCell(8).setCellValue(fail);
 					}
 					break;
 
-					//FINDS THE ELEMENTS, CLASSIFY BASED ON THE ATTRIBUTE
+				//FINDS THE ELEMENTS, CLASSIFY BASED ON THE ATTRIBUTE
 				case "findElement":
 					switch(testcase[i].fieldReference){
 					case "id":
@@ -164,11 +188,11 @@ public class TestCase {
 							System.out.println(testcase[i].field);
 							we = driver.findElement(By.id(testcase[i].field));
 							i = testcase[i].successCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(pass);
+							resultsheet.getRow(i).createCell(8).setCellValue(pass);
 						}
 						else{
 							i = testcase[i].failureCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(fail);
+							resultsheet.getRow(i).createCell(8).setCellValue(fail);
 						}
 						break;
 
@@ -176,11 +200,11 @@ public class TestCase {
 						if((driver.findElement(By.name(testcase[i].field))).isDisplayed()){
 							we = driver.findElement(By.name(testcase[i].field));
 							i = testcase[i].successCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(pass);
+							resultsheet.getRow(i).createCell(8).setCellValue(pass);
 						}
 						else{
 							i = testcase[i].failureCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(fail);
+							resultsheet.getRow(i).createCell(8).setCellValue(fail);
 						}
 						break;
 
@@ -188,11 +212,11 @@ public class TestCase {
 						if((driver.findElement(By.linkText(testcase[i].field))).isDisplayed()){
 							we = driver.findElement(By.linkText(testcase[i].field));
 							i = testcase[i].successCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(pass);
+							resultsheet.getRow(i).createCell(8).setCellValue(pass);
 						}
 						else{
 							i = testcase[i].failureCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(fail);
+							resultsheet.getRow(i).createCell(8).setCellValue(fail);
 						}
 						break;
 
@@ -200,11 +224,11 @@ public class TestCase {
 						if((driver.findElement(By.className(testcase[i].field))).isDisplayed()){
 							we = driver.findElement(By.className(testcase[i].field));
 							i = testcase[i].successCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(pass);
+							resultsheet.getRow(i).createCell(8).setCellValue(pass);
 						}
 						else{
 							i = testcase[i].failureCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(fail);
+							resultsheet.getRow(i).createCell(8).setCellValue(fail);
 						}
 						break;
 
@@ -212,53 +236,63 @@ public class TestCase {
 						if((driver.findElement(By.partialLinkText(testcase[i].field))).isDisplayed()){
 							we = driver.findElement(By.partialLinkText(testcase[i].field));
 							i = testcase[i].successCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(pass);
+							resultsheet.getRow(i).createCell(8).setCellValue(pass);
 						}
 						else{
 							i = testcase[i].failureCondition;
-							ressheet.getRow(i).getCell(8).setCellValue(fail);
+							resultsheet.getRow(i).createCell(8).setCellValue(fail);
 						}
 						break;
 					}
 					break;
 
+				//PERFORMS FUNCTIONS LIKE CLICK, SEND KEYS, SELECT ETC
 				case "fillValue":
 					switch(we.getTagName()){
 					case "input":
 					case "label":
 					case "a":
-						if((testcase[i].field).equals("clear")){
-							System.out.println(testcase[i].field);
-							we.clear();
-						}
-						else if((testcase[i].field).equals("click")){
-							System.out.println(testcase[i].field);
-							we.click();	
-						}
-						else{
-							System.out.println(testcase[i].field);
-							we.sendKeys(testcase[i].fieldValue);
-						}
+						
+							if((testcase[i].field).equals("clear")){
+								resultsheet.getRow(i).createCell(8).setCellValue(pass);
+								we.clear();
+							}
+							else if((testcase[i].field).equals("click")){
+								resultsheet.getRow(i).createCell(8).setCellValue(pass);
+								we.click();	
+							}
+							else if((testcase[i].field).equals("sendkeys")){
+								resultsheet.getRow(i).createCell(8).setCellValue(pass);
+								we.sendKeys(testcase[i].fieldValue);
+							}
+							else{
+								resultsheet.getRow(i).createCell(8).setCellValue(fail);
+							}
+						
 						break;
 
 					case "button":
 						we.click();
+						resultsheet.getRow(i).createCell(8).setCellValue(pass);
 						break;
 
 					case "select":
-						Select dropdown= new Select(we);
-						if((testcase[i].fieldValue).isEmpty())
+						Select dropdown = new Select(we);
+						if((testcase[i].fieldValue).isEmpty()){
 							dropdown.selectByIndex(testcase[i].fieldValueInt);
-
-						else
+							resultsheet.getRow(i).createCell(8).setCellValue(pass);
+						}
+						else{
 							dropdown.selectByVisibleText(testcase[i].fieldValue);									
+							resultsheet.getRow(i).createCell(8).setCellValue(pass);
+						}
 						break;
 					}
 					i = testcase[i].successCondition;
-					ressheet.getRow(i).getCell(8).setCellValue(pass);
 					break;
 
-				case "End":
+				case "end":
+					TimeUnit.SECONDS.sleep(5);
 					break;
 
 				default:
@@ -268,7 +302,14 @@ public class TestCase {
 				//}
 			}	//for loop
 		}	//while loop
-	}
+		
+		//SAVES THE VALUES INTO THE RESULT SHEET
+		FileOutputStream fos = new FileOutputStream(resultfile);
+		resultwb.write(fos);
+		System.out.println("File written");
+		resultwb.close();
+		} //outer while loop
+}
 
 
 	public static boolean checkStatusCode(String baseurl) throws ClientProtocolException, IOException{
