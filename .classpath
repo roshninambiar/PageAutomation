@@ -25,5 +25,10 @@
 	<classpathentry kind="lib" path="/home/devteam/Documents/poi-3.17/All jar files/commons-logging-1.2.jar"/>
 	<classpathentry kind="lib" path="/home/devteam/Documents/poi-3.17/All jar files/commons-collections4-4.1.jar"/>
 	<classpathentry kind="lib" path="/home/devteam/Documents/poi-3.17/All jar files/commons-codec-1.10.jar"/>
+	<classpathentry kind="lib" path="/home/devteam/Documents/commons-io-2.6/commons-io-2.6.jar"/>
+	<classpathentry kind="lib" path="/home/devteam/Documents/commons-io-2.6/commons-io-2.6-javadoc.jar"/>
+	<classpathentry kind="lib" path="/home/devteam/Documents/commons-io-2.6/commons-io-2.6-sources.jar"/>
+	<classpathentry kind="lib" path="/home/devteam/Documents/commons-io-2.6/commons-io-2.6-tests.jar"/>
+	<classpathentry kind="lib" path="/home/devteam/Documents/commons-io-2.6/commons-io-2.6-test-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
