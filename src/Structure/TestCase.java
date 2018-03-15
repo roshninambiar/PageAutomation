@@ -104,8 +104,7 @@ public class TestCase {
 
         FileInputStream fis = new FileInputStream(file);
         HSSFWorkbook wb = new HSSFWorkbook(fis);
-
-        int next_test_case = 1;
+        
         //int totalsheetnum = wb.getNumberOfSheets();
         HSSFSheet sheet = wb.getSheetAt(1);
         HSSFSheet referencesheet = wb.getSheetAt(0);
@@ -130,6 +129,8 @@ public class TestCase {
             FileInputStream resultfis = new FileInputStream(resultfile);
             HSSFWorkbook resultwb = new HSSFWorkbook(resultfis);
 
+
+            int next_test_case = 1;
             int j = 1, k = 1, i = 0;
             int referencerow = 1;
             //CALCULATING MAX NUMBER OF ROWS AND COLUMNS IN THE EXCEL SHEET
@@ -138,20 +139,20 @@ public class TestCase {
             int maxcol = sheet.getRow(maxrow).getLastCellNum();
 
             //RUNNING A LOOP FOR THE INPUT
-            while (j != (maxrow + 1)) {
+            while (next_test_case != (maxrow + 1)) {
                 for (j = 1; j <= maxrow; j++) {
                     HSSFSheet resultsheet = resultwb.getSheetAt(1);
                     //HSSFSheet resultsheetname1 = wb.cloneSheet(currentsheetnum);
 
-                    testAction = sheet.getRow(j).getCell(2).getStringCellValue();
-                    field = sheet.getRow(j).getCell(3).getStringCellValue();
-                    fieldRef = sheet.getRow(j).getCell(4).getStringCellValue();
+                    testAction = sheet.getRow(next_test_case).getCell(2).getStringCellValue();
+                    field = sheet.getRow(next_test_case).getCell(3).getStringCellValue();
+                    fieldRef = sheet.getRow(next_test_case).getCell(4).getStringCellValue();
 
-                    sheetReferenceValue = sheet.getRow(j).getCell(6).getStringCellValue();
-                    successCond = (int) sheet.getRow(j).getCell(7).getNumericCellValue();
-                    failureCond = (int) sheet.getRow(j).getCell(8).getNumericCellValue();
+                    sheetReferenceValue = sheet.getRow(next_test_case).getCell(6).getStringCellValue();
+                    successCond = (int) sheet.getRow(next_test_case).getCell(7).getNumericCellValue();
+                    failureCond = (int) sheet.getRow(next_test_case).getCell(8).getNumericCellValue();
 
-                    HSSFCell cell = sheet.getRow(j).getCell(5);
+                    HSSFCell cell = sheet.getRow(next_test_case).getCell(5);
                     CellType type = cell.getCellTypeEnum();
 
                     //CHECKS IF THE VALUE IN THE 'FIELD' IN SHEET IS A STRING OR A NUMBER AND CALLS APPROPRIATE CONSTRUCTOR
@@ -182,17 +183,17 @@ public class TestCase {
                                     index++;
                                 }
                             } else {
-                                fieldValString = sheet.getRow(j).getCell(5).getStringCellValue();
+                                fieldValString = sheet.getRow(next_test_case).getCell(5).getStringCellValue();
                             }
 
                         } else {
-                            fieldValString = sheet.getRow(j).getCell(5).getStringCellValue();
+                            fieldValString = sheet.getRow(next_test_case).getCell(5).getStringCellValue();
                         }
                         testcase[i] = new test(testAction, field, fieldRef, fieldValString, successCond, failureCond);
 
                     }
                     if (type == CellType.NUMERIC) {
-                        fieldValInt = (int) sheet.getRow(j).getCell(5).getNumericCellValue();
+                        fieldValInt = (int) sheet.getRow(next_test_case).getCell(5).getNumericCellValue();
                         testcase[i] = new test(testAction, field, fieldRef, fieldValInt, successCond, failureCond);
                     }
 
@@ -209,11 +210,13 @@ public class TestCase {
                             System.out.println(status); //CALL THE FUNCTION TO GET THE HTTP RESPONSE CODE
                             if (status == true) {
                                 driver.get(testcase[i].field);
-                                i = testcase[i].successCondition;
-                                resultsheet.getRow(i).createCell(9).setCellValue(pass);
+                                System.out.println("::::::::::::::::::::::::"+testcase[i].successCondition+"  "+next_test_case);
+                                next_test_case = testcase[i].successCondition;
+                                System.out.println("-----:::::::::::::::----"+testcase[i].successCondition+"  "+next_test_case);
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                             } else {
-                                i = testcase[i].failureCondition;
-                                resultsheet.getRow(i).createCell(9).setCellValue(fail);
+                            	next_test_case = testcase[i].failureCondition;
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                             }
 
                             break;
@@ -226,67 +229,66 @@ public class TestCase {
                                     case "id":
                                         if ((driver.findElement(By.id(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.id(testcase[i].field));
-                                            i = testcase[i].successCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         } else {
-                                            i = testcase[i].failureCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
                                     case "name":
                                         if ((driver.findElement(By.name(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.name(testcase[i].field));
-                                            i = testcase[i].successCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         } else {
-                                            i = testcase[i].failureCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
                                     case "link":
                                         if ((driver.findElement(By.linkText(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.linkText(testcase[i].field));
-                                            i = testcase[i].successCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         } else {
-                                            i = testcase[i].failureCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
                                     case "class":
                                         if ((driver.findElement(By.className(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.className(testcase[i].field));
-                                            i = testcase[i].successCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         } else {
-                                            i = testcase[i].failureCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
                                     case "partial link":
                                         if ((driver.findElement(By.partialLinkText(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.partialLinkText(testcase[i].field));
-                                            i = testcase[i].successCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         } else {
-                                            i = testcase[i].failureCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
                                     case "xpath":
                                         if (driver.findElement(By.xpath(testcase[i].field)).isDisplayed()) {
                                             we = driver.findElement(By.xpath(testcase[i].field));
-                                            i = testcase[i].successCondition;
-                                            resultsheet.getRow(i).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         } else {
-                                            i = testcase[i].failureCondition;
-
-                                            resultsheet.getRow(i).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
@@ -294,8 +296,8 @@ public class TestCase {
                             } catch (Exception e) {
                                 System.out.println("findElement" + "--------" + i + "---------" + testcase[i].field);
                                 System.out.println("Exception handled!");
-                                resultsheet.getRow(i).createCell(9).setCellValue(fail);
-                                i = testcase[i].failureCondition;
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                next_test_case = testcase[i].failureCondition;
                             }
                             break;
 
@@ -308,42 +310,42 @@ public class TestCase {
                                     case "a":
                                     case "div":
                                         if ((testcase[i].field).equals("clear")) {
-                                            resultsheet.getRow(i + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
                                             we.clear();
                                         } else if ((testcase[i].field).equals("click")) {
-                                            resultsheet.getRow(i + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
                                             we.click();
                                         } else if ((testcase[i].field).equals("sendkeys")) {
-                                            resultsheet.getRow(i + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
                                             we.sendKeys(testcase[i].fieldValue);
                                         } else {
-                                            resultsheet.getRow(i + 1).createCell(9).setCellValue(fail);
+                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
                                     case "button":
                                         we.click();
-                                        resultsheet.getRow(i + 1).createCell(9).setCellValue(pass);
+                                        resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
                                         break;
 
                                     case "select":
                                         Select dropdown = new Select(we);
                                         if ((testcase[i].fieldValue).isEmpty()) {
                                             dropdown.selectByIndex(testcase[i].fieldValueInt);
-                                            resultsheet.getRow(i + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
                                         } else {
                                             dropdown.selectByVisibleText(testcase[i].fieldValue);
-                                            resultsheet.getRow(i + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
                                         }
                                         break;
                                 }
-                                //i = testcase[i].successCondition;
+                                next_test_case = testcase[i].successCondition;
                                 break;
                             } catch (Exception e) {
                                 System.out.println("fillValue" + "------" + i + "-------" + testcase[i].field);
                                 System.out.println("Fill value exception");
-                                resultsheet.getRow(i + 1).createCell(9).setCellValue(fail);
-                                i = testcase[i].failureCondition;
+                                resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(fail);
+                                next_test_case = testcase[i].failureCondition;
                             }
                         case "end":
                         	TimeUnit.SECONDS.sleep(5);
