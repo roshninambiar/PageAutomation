@@ -139,7 +139,7 @@ public class TestCase {
             int maxcol = sheet.getRow(maxrow).getLastCellNum();
 
             //RUNNING A LOOP FOR THE INPUT
-            while (next_test_case != (maxrow + 1)) {
+            while (next_test_case < (maxrow + 1)) {
                 for (j = 1; j <= maxrow; j++) {
                     HSSFSheet resultsheet = resultwb.getSheetAt(1);
                     //HSSFSheet resultsheetname1 = wb.cloneSheet(currentsheetnum);
@@ -209,14 +209,12 @@ public class TestCase {
                             boolean status = checkStatusCode(testcase[i].field);
                             System.out.println(status); //CALL THE FUNCTION TO GET THE HTTP RESPONSE CODE
                             if (status == true) {
-                                driver.get(testcase[i].field);
-                                System.out.println("::::::::::::::::::::::::"+testcase[i].successCondition+"  "+next_test_case);
-                                next_test_case = testcase[i].successCondition;
-                                System.out.println("-----:::::::::::::::----"+testcase[i].successCondition+"  "+next_test_case);
+                                driver.get(testcase[i].field);                               
                                 resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                next_test_case = testcase[i].successCondition;
                             } else {
-                            	next_test_case = testcase[i].failureCondition;
                                 resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                            	next_test_case = testcase[i].failureCondition;
                             }
 
                             break;
@@ -229,73 +227,72 @@ public class TestCase {
                                     case "id":
                                         if ((driver.findElement(By.id(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.id(testcase[i].field));
-                                            next_test_case = testcase[i].successCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
                                         } else {
-                                        	next_test_case = testcase[i].failureCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
                                         }
                                         break;
 
                                     case "name":
                                         if ((driver.findElement(By.name(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.name(testcase[i].field));
-                                            next_test_case = testcase[i].successCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
                                         } else {
-                                        	next_test_case = testcase[i].failureCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                            next_test_case = testcase[i].failureCondition;
                                         }
                                         break;
 
                                     case "link":
                                         if ((driver.findElement(By.linkText(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.linkText(testcase[i].field));
-                                            next_test_case = testcase[i].successCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
                                         } else {
-                                        	next_test_case = testcase[i].failureCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
                                         }
                                         break;
 
                                     case "class":
                                         if ((driver.findElement(By.className(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.className(testcase[i].field));
-                                            next_test_case = testcase[i].successCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
                                         } else {
-                                        	next_test_case = testcase[i].failureCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
                                         }
                                         break;
 
                                     case "partial link":
                                         if ((driver.findElement(By.partialLinkText(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.partialLinkText(testcase[i].field));
-                                            next_test_case = testcase[i].successCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
                                         } else {
-                                        	next_test_case = testcase[i].failureCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
                                         }
                                         break;
 
                                     case "xpath":
                                         if (driver.findElement(By.xpath(testcase[i].field)).isDisplayed()) {
                                             we = driver.findElement(By.xpath(testcase[i].field));
-                                            next_test_case = testcase[i].successCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
                                         } else {
-                                        	next_test_case = testcase[i].failureCondition;
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
                                         }
                                         break;
 
                                 }
                             } catch (Exception e) {
-                                System.out.println("findElement" + "--------" + i + "---------" + testcase[i].field);
-                                System.out.println("Exception handled!");
+                                System.out.println("Exception handled!! " + e);
                                 resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                 next_test_case = testcase[i].failureCondition;
                             }
@@ -310,45 +307,48 @@ public class TestCase {
                                     case "a":
                                     case "div":
                                         if ((testcase[i].field).equals("clear")) {
-                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                             we.clear();
                                         } else if ((testcase[i].field).equals("click")) {
-                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                             we.click();
                                         } else if ((testcase[i].field).equals("sendkeys")) {
-                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                             we.sendKeys(testcase[i].fieldValue);
                                         } else {
-                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(fail);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                         }
                                         break;
 
                                     case "button":
                                         we.click();
-                                        resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
+                                        resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         break;
 
                                     case "select":
                                         Select dropdown = new Select(we);
                                         if ((testcase[i].fieldValue).isEmpty()) {
                                             dropdown.selectByIndex(testcase[i].fieldValueInt);
-                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         } else {
                                             dropdown.selectByVisibleText(testcase[i].fieldValue);
-                                            resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(pass);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                         }
                                         break;
                                 }
                                 next_test_case = testcase[i].successCondition;
                                 break;
                             } catch (Exception e) {
-                                System.out.println("fillValue" + "------" + i + "-------" + testcase[i].field);
-                                System.out.println("Fill value exception");
-                                resultsheet.getRow(next_test_case + 1).createCell(9).setCellValue(fail);
+                            	System.out.println("Exception handled!! "+e);
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
                                 next_test_case = testcase[i].failureCondition;
                             }
                         case "end":
-                        	TimeUnit.SECONDS.sleep(5);
+                        	System.out.println("End!!");
+                        	FileOutputStream fos = new FileOutputStream(resultfile);
+                            resultwb.write(fos);
+                            System.out.println("End Result file written");
+                        	System.exit(0);
                         	break;
 
                         default:
@@ -362,7 +362,7 @@ public class TestCase {
             //SAVES THE VALUES INTO THE RESULT SHEET
             FileOutputStream fos = new FileOutputStream(resultfile);
             resultwb.write(fos);
-            System.out.println("File written");
+            System.out.println("Result file written");
             resultwb.close();
             currentsheetnum++;
         } //outer while loop
@@ -373,7 +373,7 @@ public class TestCase {
 
     public static boolean checkStatusCode(String baseurl) throws ClientProtocolException, IOException {
 
-        boolean ret = true;
+        boolean status = true;
 
         //GET STATUS CODE
         HttpClient httpclient = new DefaultHttpClient();
@@ -384,11 +384,11 @@ public class TestCase {
 
         //CHECK IF STATUS CODE IS A SUCCESS OR FAILURE CONDITION
         if (code == 200) {
-            ret = true;
+        	status = true;
         } else if (code == 404) {
-            ret = false;
+        	status = false;
         }
-        return ret;
+        return status;
     }
 
     public static void waitForPageLoaded(WebDriver driver) {
