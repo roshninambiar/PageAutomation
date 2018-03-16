@@ -105,7 +105,6 @@ public class TestCase {
         FileInputStream fis = new FileInputStream(file);
         HSSFWorkbook wb = new HSSFWorkbook(fis);
         
-        //int totalsheetnum = wb.getNumberOfSheets();
         HSSFSheet sheet = wb.getSheetAt(1);
         HSSFSheet referencesheet = wb.getSheetAt(0);
         int totalsheetnum = referencesheet.getLastRowNum();
@@ -142,8 +141,6 @@ public class TestCase {
             while (next_test_case < (maxrow + 1)) {
                 for (j = 1; j <= maxrow; j++) {
                     HSSFSheet resultsheet = resultwb.getSheetAt(1);
-                    //HSSFSheet resultsheetname1 = wb.cloneSheet(currentsheetnum);
-
                     testAction = sheet.getRow(next_test_case).getCell(2).getStringCellValue();
                     field = sheet.getRow(next_test_case).getCell(3).getStringCellValue();
                     fieldRef = sheet.getRow(next_test_case).getCell(4).getStringCellValue();
@@ -214,6 +211,7 @@ public class TestCase {
                                 next_test_case = testcase[i].successCondition;
                             } else {
                                 resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                resultsheet.getRow(next_test_case).createCell(10).setCellValue("Status: "+status);
                             	next_test_case = testcase[i].failureCondition;
                             }
 
@@ -289,11 +287,26 @@ public class TestCase {
                                         	next_test_case = testcase[i].failureCondition;
                                         }
                                         break;
+                                        
+                                    case "linkText":
+                                    	 if (driver.findElement(By.xpath(testcase[i].field)).isDisplayed()) {
+                                             we = driver.findElement(By.linkText(testcase[i].field));
+                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                             next_test_case = testcase[i].successCondition;
+                                         } else {
+                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                         	 next_test_case = testcase[i].failureCondition;
+                                         }
+                                         break;
+                                         
+                                    default:
+                                    	break;
 
                                 }
                             } catch (Exception e) {
                                 System.out.println("Exception handled!! " + e);
                                 resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                resultsheet.getRow(next_test_case).createCell(10).setCellValue(e.toString());
                                 next_test_case = testcase[i].failureCondition;
                             }
                             break;
@@ -341,6 +354,7 @@ public class TestCase {
                             } catch (Exception e) {
                             	System.out.println("Exception handled!! "+e);
                                 resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                resultsheet.getRow(next_test_case).createCell(10).setCellValue(e.toString());
                                 next_test_case = testcase[i].failureCondition;
                             }
                         case "end":
@@ -391,6 +405,7 @@ public class TestCase {
         return status;
     }
 
+    //WAIT FOR PAGE ELEMENTS TO LOAD
     public static void waitForPageLoaded(WebDriver driver) {
         ExpectedCondition < Boolean > expectation = new
         ExpectedCondition < Boolean > () {
