@@ -9,6 +9,7 @@ import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
 
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpResponse;
 import org.apache.http.StatusLine;
 import org.apache.http.client.ClientProtocolException;
@@ -21,340 +22,403 @@ import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.FormulaEvaluator;
 import org.apache.poi.ss.usermodel.CellType;
 import org.openqa.selenium.By;
+import org.openqa.selenium.JavascriptExecutor;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 import com.google.common.collect.Table.Cell;
 
 //THIS CLASS CONTAINS THE VARIABLES THAT NEEDS TO BE INITIALIZED FOR INITIATING THE LOADING AND TESTING OF PAGE
-class test{
-	String testAction;
-	String field;
-	String fieldReference;
-	String fieldValue;
-	int successCondition;
-	int failureCondition;
-	int fieldValueInt;
+class test {
+    String testAction;
+    String field;
+    String fieldReference;
+    String fieldValue;
+    int successCondition;
+    int failureCondition;
+    int fieldValueInt;
 
-	//PARAMETRIZED CONSTRUCTOR FOR INITIALIZING WHEN FIELD VALUE IS A STRING
-	public test(String testAction,String field,String fieldReference,String fieldValueString,int successCondition,int failureCondition){
-		this.testAction = testAction;
-		this.field = field;
-		this.fieldReference = fieldReference;
-		this.fieldValue = fieldValueString;
-		this.fieldValueInt = 0;
-		this.successCondition = successCondition;
-		this.failureCondition = failureCondition;
-	}
+    //PARAMETRIZED CONSTRUCTOR FOR INITIALIZING WHEN FIELD VALUE IS A STRING
+    public test(String testAction, String field, String fieldReference, String fieldValueString, int successCondition, int failureCondition) {
+        this.testAction = testAction;
+        this.field = field;
+        this.fieldReference = fieldReference;
+        this.fieldValue = fieldValueString;
+        this.fieldValueInt = 0;
+        this.successCondition = successCondition;
+        this.failureCondition = failureCondition;
+    }
 
-	//PARAMETRIZED CONSTRUCTOR FOR INITIALIZING WHEN FIELD VALUE IS AN INTEGER
-	public test(String testAction,String field,String fieldReference,int fieldValueInt,int successCondition,int failureCondition){
-		this.testAction = testAction;
-		this.field = field;
-		this.fieldReference = fieldReference;
-		this.fieldValue = "";
-		this.fieldValueInt = fieldValueInt;
-		this.successCondition = successCondition;
-		this.failureCondition = failureCondition;
-	}
+    //PARAMETRIZED CONSTRUCTOR FOR INITIALIZING WHEN FIELD VALUE IS AN INTEGER
+    public test(String testAction, String field, String fieldReference, int fieldValueInt, int successCondition, int failureCondition) {
+        this.testAction = testAction;
+        this.field = field;
+        this.fieldReference = fieldReference;
+        this.fieldValue = "";
+        this.fieldValueInt = fieldValueInt;
+        this.successCondition = successCondition;
+        this.failureCondition = failureCondition;
+    }
 
 }
 
 public class TestCase {
-	public static void main(String args[]) throws Exception{
+    public static void main(String args[]) throws Exception {
 
-		WebElement we = null;
-		String testAction = "";
-		String field = "";
-		String fieldRef = ""; 
-		String fieldValString = "";
-		int successCond = 0;
-		int failureCond = 0;
-		int fieldValInt = 0;
+        WebElement we = null;
+        String testAction = "";
+        String field = "";
+        String fieldRef = "";
+        String fieldValString = "";
+        int successCond = 0;
+        int failureCond = 0;
+        int fieldValInt = 0;
 
-		String pass = "Passed";
-		String fail = "Failed";
-
-
-
-		//SET THE DRIVER LOCATION 
-
-		System.setProperty("webdriver.chrome.driver", "/home/devteam/Documents/AllDrivers/chromedriver");
-		System.setProperty("webdriver.gecko.driver", "/home/devteam/Documents/AllDrivers/geckodriver");
-		//INITIALIZE THE DRIVER
-
-		//WebDriver driver = new ChromeDriver();
-		WebDriver driver = new FirefoxDriver();
-
-		//ARRAY OF OBJECTS OF THE TEST CLASS
-		test[] testcase = new test[110];
-
-		String filename = "loadPage.xls";
-		String path = "/home/devteam/Documents/ExcelFiles/src/"+filename;
-		File file = new File(path);
-
-		FileInputStream fis = new FileInputStream(file);
-		HSSFWorkbook wb = new HSSFWorkbook(fis);
+        String sheetReferenceValue = "";
+        String pass = "Passed";
+        String fail = "Failed";
 
 
-		int totalsheetnum = wb.getNumberOfSheets();
-		System.out.println("Total sheets: "+totalsheetnum);
-		int currentsheetnum = 0;
+
+        //SET THE DRIVER LOCATION 
+
+        System.setProperty("webdriver.chrome.driver", "/home/devteam/Documents/AllDrivers/chromedriver");
+        System.setProperty("webdriver.gecko.driver", "/home/devteam/Documents/AllDrivers/geckodriver");
+        //INITIALIZE THE DRIVER
+
+        //WebDriver driver = new ChromeDriver();
+        WebDriver driver = null;
+
+        //ARRAY OF OBJECTS OF THE TEST CLASS
+        test[] testcase = new test[110];
+
+        String filename = "jdmanage.xls";
+        String path = "/home/devteam/Documents/ExcelFiles/src/" + filename;
+        File file = new File(path);
+
+        FileInputStream fis = new FileInputStream(file);
+        HSSFWorkbook wb = new HSSFWorkbook(fis);
+        
+        HSSFSheet sheet = wb.getSheetAt(1);
+        HSSFSheet referencesheet = wb.getSheetAt(0);
+        int totalsheetnum = referencesheet.getLastRowNum();
+        System.out.println("Total sheets: " + totalsheetnum);
+        int currentsheetnum = 1;
+
+        while (currentsheetnum < (totalsheetnum + 1)) {
+
+            //RETRIEVE CURRENT DATE AND TIME
+
+            DateTimeFormatter datetimeformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");
+            LocalDateTime timenow = LocalDateTime.now();
+            String date = datetimeformatter.format(timenow);
 
 
-		while(currentsheetnum != (totalsheetnum)){
+            //CREATE RESULT FILE(copy of source file) AND APPEND DATE TO THE FILE NAME
+            String resultfilename = "Result_" + date + "_" + file.getName();
+            File resultfile = new File("/home/devteam/Documents/ExcelFiles/result/" + FilenameUtils.getBaseName(file.getName()) + "/" + resultfilename);
+            FileUtils.copyFile(file, resultfile);
 
-			HSSFSheet sheet = wb.getSheetAt(currentsheetnum);
-			currentsheetnum++;
-			//RETRIEVE CURRENT DATE AND TIME
-			
-			DateTimeFormatter datetimeformatter = DateTimeFormatter.ofPattern("yyyy-MM-dd_HH:mm:ss");  
-			LocalDateTime timenow = LocalDateTime.now();  
-			String date = datetimeformatter.format(timenow);
-			 
-			
-			//CREATE RESULT FILE(copy of source file) AND APPEND DATE TO THE FILE NAME
-			String resultfilename = "Result_" + date + "_" + file.getName();
-			//String resultfilename = "Result_" + file.getName();
-			File resultfile = new File("/home/devteam/Documents/ExcelFiles/result/"+resultfilename);
-			FileUtils.copyFile(file, resultfile);
-
-			FileInputStream resultfis = new FileInputStream(resultfile);
-			HSSFWorkbook resultwb =  new HSSFWorkbook(resultfis);
-			HSSFSheet resultsheet = resultwb.getSheetAt(0);
-
-			//FileOutputStream fos = new FileOutputStream(resultf);
+            FileInputStream resultfis = new FileInputStream(resultfile);
+            HSSFWorkbook resultwb = new HSSFWorkbook(resultfis);
 
 
-			int j=1, k=1, i=0;
+            int next_test_case = 1;
+            int j = 1, k = 1, i = 0;
+            int referencerow = 1;
+            //CALCULATING MAX NUMBER OF ROWS AND COLUMNS IN THE EXCEL SHEET
 
-			//CALCULATING MAX NUMBER OF ROWS AND COLUMNS IN THE EXCEL SHEET
+            int maxrow = sheet.getLastRowNum();
+            int maxcol = sheet.getRow(maxrow).getLastCellNum();
 
-			int maxrow = sheet.getLastRowNum();
-			int maxcol = sheet.getRow(maxrow).getLastCellNum();
+            //RUNNING A LOOP FOR THE INPUT
+            while (next_test_case < (maxrow + 1)) {
+                for (j = 1; j <= maxrow; j++) {
+                    HSSFSheet resultsheet = resultwb.getSheetAt(1);
+                    testAction = sheet.getRow(next_test_case).getCell(2).getStringCellValue();
+                    field = sheet.getRow(next_test_case).getCell(3).getStringCellValue();
+                    fieldRef = sheet.getRow(next_test_case).getCell(4).getStringCellValue();
 
-			//RUNNING A LOOP FOR THE INPUT
-			while(j!=(maxrow+1)){
-				for(j=1; j<=maxrow; j++){
-					System.out.println(sheet.getRow(j).getCell(2)+" "+j);
+                    sheetReferenceValue = sheet.getRow(next_test_case).getCell(6).getStringCellValue();
+                    successCond = (int) sheet.getRow(next_test_case).getCell(7).getNumericCellValue();
+                    failureCond = (int) sheet.getRow(next_test_case).getCell(8).getNumericCellValue();
 
-					testAction = sheet.getRow(j).getCell(2).getStringCellValue();
-					field = sheet.getRow(j).getCell(3).getStringCellValue();
-					fieldRef = sheet.getRow(j).getCell(4).getStringCellValue();
-					successCond = (int) sheet.getRow(j).getCell(6).getNumericCellValue();
-					failureCond = (int) sheet.getRow(j).getCell(7).getNumericCellValue();
+                    HSSFCell cell = sheet.getRow(next_test_case).getCell(5);
+                    CellType type = cell.getCellTypeEnum();
 
-					HSSFCell cell = sheet.getRow(j).getCell(5);
-					CellType type = cell.getCellTypeEnum();
-
-					//CHECKS IF THE VALUE IN THE 'FIELD' IN SHEET IS A STRING OR A NUMBER AND CALLS APPROPRIATE CONSTRUCTOR
-					if(type == CellType.STRING){
-						fieldValString = sheet.getRow(j).getCell(5).getStringCellValue();
-						testcase[i] = new test(testAction, field, fieldRef, fieldValString, successCond, failureCond);
-					}
-					if(type == CellType.NUMERIC){
-						fieldValInt = (int) sheet.getRow(j).getCell(5).getNumericCellValue();
-						testcase[i] = new test(testAction, field, fieldRef, fieldValInt, successCond, failureCond);
-					}
+                    //CHECKS IF THE VALUE IN THE 'FIELD' IN SHEET IS A STRING OR A NUMBER AND CALLS APPROPRIATE CONSTRUCTOR
 
 
-					System.out.println(testAction+ field+ fieldRef+ fieldValString + fieldValInt+ successCond+ failureCond);
+                    if (type == CellType.STRING) {
+                        if ((testAction).equals("fillValue")) {
 
-					switch(testcase[i].testAction){
+                            if (!sheetReferenceValue.equals("null")) {
+                                int index = 0;
+                                while (index != referencesheet.getRow(0).getLastCellNum()) {
+                                    HSSFCell referencecell = referencesheet.getRow(currentsheetnum).getCell(index);
+                                    CellType celltype = referencecell.getCellTypeEnum();
+                                    if (celltype == CellType.STRING) {
+                                        if (referencesheet.getRow(0).getCell(index).getStringCellValue().equals(sheetReferenceValue)) {
+                                            fieldValString = referencesheet.getRow(currentsheetnum).getCell(index).getStringCellValue();
+                                            referencerow++;
+                                            break;
+                                        }
+                                    }
+                                    /*else if(celltype == CellType.NUMERIC){
+                                    	if(referencesheet.getRow(0).getCell(index).getStringCellValue().equals(sheetReferenceValue)){
+                                    		fieldValInt = (int) referencesheet.getRow(currentsheetnum).getCell(index).getNumericCellValue();
+                                    		referencerow++;
+                                    		break;
+                                    	}
+                                    }*/
+                                    index++;
+                                }
+                            } else {
+                                fieldValString = sheet.getRow(next_test_case).getCell(5).getStringCellValue();
+                            }
 
-					//LOADS THE PAGE BASED ON THE STATUS CODE 
-					case "loadPage":
-						//driver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
-						boolean status = checkStatusCode(testcase[i].field);
-						System.out.println(status);//CALL THE FUNCTION TO GET THE HTTP RESPONSE CODE
-						if(status == true){
-							driver.get(testcase[i].field);
-							i = testcase[i].successCondition;
-							resultsheet.getRow(i).createCell(8).setCellValue(pass);
-						}
-						else{
-							i = testcase[i].failureCondition;
-							resultsheet.getRow(i).createCell(8).setCellValue(fail);
-						}
-						break;
+                        } else {
+                            fieldValString = sheet.getRow(next_test_case).getCell(5).getStringCellValue();
+                        }
+                        testcase[i] = new test(testAction, field, fieldRef, fieldValString, successCond, failureCond);
 
-						//FINDS THE ELEMENTS, CLASSIFY BASED ON THE ATTRIBUTE
-					case "findElement":
-						switch(testcase[i].fieldReference){
-						case "id":
-							if((driver.findElement(By.id(testcase[i].field))).isDisplayed()){
-								System.out.println(testcase[i].field);
-								we = driver.findElement(By.id(testcase[i].field));
-								i = testcase[i].successCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							}
-							else{
-								i = testcase[i].failureCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(fail);
-							}
-							break;
-
-						case "name":
-							if((driver.findElement(By.name(testcase[i].field))).isDisplayed()){
-								we = driver.findElement(By.name(testcase[i].field));
-								i = testcase[i].successCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							}
-							else{
-								i = testcase[i].failureCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(fail);
-							}
-							break;
-
-						case "link":
-							if((driver.findElement(By.linkText(testcase[i].field))).isDisplayed()){
-								we = driver.findElement(By.linkText(testcase[i].field));
-								i = testcase[i].successCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							}
-							else{
-								i = testcase[i].failureCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(fail);
-							}
-							break;
-
-						case "class":
-							if((driver.findElement(By.className(testcase[i].field))).isDisplayed()){
-								we = driver.findElement(By.className(testcase[i].field));
-								i = testcase[i].successCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							}
-							else{
-								i = testcase[i].failureCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(fail);
-							}
-							break;
-
-						case "partial link":
-							if((driver.findElement(By.partialLinkText(testcase[i].field))).isDisplayed()){
-								we = driver.findElement(By.partialLinkText(testcase[i].field));
-								i = testcase[i].successCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							}
-							else{
-								i = testcase[i].failureCondition;
-								resultsheet.getRow(i).createCell(8).setCellValue(fail);
-							}
-							break;
-						}
-						break;
-
-						//PERFORMS FUNCTIONS LIKE CLICK, SEND KEYS, SELECT ETC
-					case "fillValue":
-						switch(we.getTagName()){
-						case "input":
-						case "label":
-						case "a":
-
-							if((testcase[i].field).equals("clear")){
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-								we.clear();
-							}
-							else if((testcase[i].field).equals("click")){
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-								we.click();	
-							}
-							else if((testcase[i].field).equals("sendkeys")){
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-								we.sendKeys(testcase[i].fieldValue);
-							}
-							else{
-								resultsheet.getRow(i).createCell(8).setCellValue(fail);
-							}
-
-							break;
-
-						case "button":
-							we.click();
-							resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							break;
-
-						case "select":
-							Select dropdown = new Select(we);
-							if((testcase[i].fieldValue).isEmpty()){
-								dropdown.selectByIndex(testcase[i].fieldValueInt);
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							}
-							else{
-								dropdown.selectByVisibleText(testcase[i].fieldValue);									
-								resultsheet.getRow(i).createCell(8).setCellValue(pass);
-							}
-							break;
-						}
-						i = testcase[i].successCondition;
-						break;
-
-					case "end":
-						TimeUnit.SECONDS.sleep(5);
-						break;
-
-					default:
-						break;
-
-					}	//outer switch case
-					//}
-				}	//for loop
-			}	//while loop
-
-			//SAVES THE VALUES INTO THE RESULT SHEET
-			FileOutputStream fos = new FileOutputStream(resultfile);
-			resultwb.write(fos);
-			System.out.println("File written");
-			resultwb.close();
-		} //outer while loop
-	}
+                    }
+                    if (type == CellType.NUMERIC) {
+                        fieldValInt = (int) sheet.getRow(next_test_case).getCell(5).getNumericCellValue();
+                        testcase[i] = new test(testAction, field, fieldRef, fieldValInt, successCond, failureCond);
+                    }
 
 
-	public static boolean checkStatusCode(String baseurl) throws ClientProtocolException, IOException{
+                    System.out.println(testAction + field + fieldRef + fieldValString + fieldValInt + successCond + failureCond);
 
-		boolean ret= true;
+                    switch (testcase[i].testAction) {
 
-		//GET STATUS CODE
-		HttpClient httpclient = new DefaultHttpClient();
-		HttpGet httpget = new HttpGet(baseurl);
-		HttpResponse response = httpclient.execute(httpget);
-		StatusLine sl = response.getStatusLine();
-		int code = sl.getStatusCode();
+                        //LOADS THE PAGE BASED ON THE STATUS CODE 
+                        case "loadPage":
+                            driver = new FirefoxDriver();
+                            driver.manage().window().maximize();
+                            boolean status = checkStatusCode(testcase[i].field);
+                            System.out.println(status); //CALL THE FUNCTION TO GET THE HTTP RESPONSE CODE
+                            if (status == true) {
+                                driver.get(testcase[i].field);                               
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                next_test_case = testcase[i].successCondition;
+                            } else {
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                resultsheet.getRow(next_test_case).createCell(10).setCellValue("Status: "+status);
+                            	next_test_case = testcase[i].failureCondition;
+                            }
 
-		//CHECK IF STATUS CODE IS A SUCCESS OR FAILURE CONDITION
-		if(code == 200){
-			ret = true;
-		}
-		else if(code == 404){
-			ret = false;
-		}
-		return ret;	
-	}
-}
+                            break;
+
+                            //FINDS THE ELEMENTS, CLASSIFY BASED ON THE ATTRIBUTE
+                        case "findElement":
+                            waitForPageLoaded(driver);
+                            try {
+                                switch (testcase[i].fieldReference) {
+                                    case "id":
+                                        if ((driver.findElement(By.id(testcase[i].field))).isDisplayed()) {
+                                            we = driver.findElement(By.id(testcase[i].field));
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                        } else {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                        }
+                                        break;
+
+                                    case "name":
+                                        if ((driver.findElement(By.name(testcase[i].field))).isDisplayed()) {
+                                            we = driver.findElement(By.name(testcase[i].field));
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                        } else {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                            next_test_case = testcase[i].failureCondition;
+                                        }
+                                        break;
+
+                                    case "link":
+                                        if ((driver.findElement(By.linkText(testcase[i].field))).isDisplayed()) {
+                                            we = driver.findElement(By.linkText(testcase[i].field));
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                        } else {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                        }
+                                        break;
+
+                                    case "class":
+                                        if ((driver.findElement(By.className(testcase[i].field))).isDisplayed()) {
+                                            we = driver.findElement(By.className(testcase[i].field));
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                        } else {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                        }
+                                        break;
+
+                                    case "partial link":
+                                        if ((driver.findElement(By.partialLinkText(testcase[i].field))).isDisplayed()) {
+                                            we = driver.findElement(By.partialLinkText(testcase[i].field));
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                        } else {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                        }
+                                        break;
+
+                                    case "xpath":
+                                        if (driver.findElement(By.xpath(testcase[i].field)).isDisplayed()) {
+                                            we = driver.findElement(By.xpath(testcase[i].field));
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            next_test_case = testcase[i].successCondition;
+                                        } else {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        	next_test_case = testcase[i].failureCondition;
+                                        }
+                                        break;
+                                        
+                                    case "linkText":
+                                    	 if (driver.findElement(By.xpath(testcase[i].field)).isDisplayed()) {
+                                             we = driver.findElement(By.linkText(testcase[i].field));
+                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                             next_test_case = testcase[i].successCondition;
+                                         } else {
+                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                         	 next_test_case = testcase[i].failureCondition;
+                                         }
+                                         break;
+                                         
+                                    default:
+                                    	break;
+
+                                }
+                            } catch (Exception e) {
+                                System.out.println("Exception handled!! " + e);
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                resultsheet.getRow(next_test_case).createCell(10).setCellValue(e.toString());
+                                next_test_case = testcase[i].failureCondition;
+                            }
+                            break;
+
+                            //PERFORMS FUNCTIONS LIKE CLICK, SEND KEYS, SELECT ETC
+                        case "fillValue":
+                            try {
+                                switch (we.getTagName()) {
+                                    case "input":
+                                    case "label":
+                                    case "a":
+                                    case "div":
+                                        if ((testcase[i].field).equals("clear")) {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            we.clear();
+                                        } else if ((testcase[i].field).equals("click")) {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            we.click();
+                                        } else if ((testcase[i].field).equals("sendkeys")) {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                            we.sendKeys(testcase[i].fieldValue);
+                                        } else {
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                        }
+                                        break;
+
+                                    case "button":
+                                        we.click();
+                                        resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                        break;
+
+                                    case "select":
+                                        Select dropdown = new Select(we);
+                                        if ((testcase[i].fieldValue).isEmpty()) {
+                                            dropdown.selectByIndex(testcase[i].fieldValueInt);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                        } else {
+                                            dropdown.selectByVisibleText(testcase[i].fieldValue);
+                                            resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
+                                        }
+                                        break;
+                                }
+                                next_test_case = testcase[i].successCondition;
+                                break;
+                            } catch (Exception e) {
+                            	System.out.println("Exception handled!! "+e);
+                                resultsheet.getRow(next_test_case).createCell(9).setCellValue(fail);
+                                resultsheet.getRow(next_test_case).createCell(10).setCellValue(e.toString());
+                                next_test_case = testcase[i].failureCondition;
+                            }
+                        case "end":
+                        	System.out.println("End!!");
+                        	FileOutputStream fos = new FileOutputStream(resultfile);
+                            resultwb.write(fos);
+                            System.out.println("End Result file written");
+                        	System.exit(0);
+                        	break;
+
+                        default:
+                        	break;
+
+                    } //outer switch case
+                    //}
+                } //for loop
+            } //while loop
+
+            //SAVES THE VALUES INTO THE RESULT SHEET
+            FileOutputStream fos = new FileOutputStream(resultfile);
+            resultwb.write(fos);
+            System.out.println("Result file written");
+            resultwb.close();
+            currentsheetnum++;
+        } //outer while loop
 
 
-/*
-reswb.write(fos);
-System.out.println("File written");
-reswb.close();*/
-
-/*
-
-
-Cell cell = (Cell) sheet.getRow(j).getCell(5);
-int e = evaluator.evaluateFormulaCell((org.apache.poi.ss.usermodel.Cell) cell);
-System.out.println("What i wanna check: "+e+" ");
-if (cell!=null) {
-    switch (evaluator.evaluateFormulaCell((org.apache.poi.ss.usermodel.Cell) cell)) { 
-        case Cell.CELL_TYPE_NUMERIC:
-            System.out.println(cell.getNumericCellValue());
-            break;
-
-        case Cell.CELL_TYPE_STRING:
-            System.out.println(cell.getStringCellValue());
-            break;
     }
-}*/
+
+
+    public static boolean checkStatusCode(String baseurl) throws ClientProtocolException, IOException {
+
+        boolean status = true;
+
+        //GET STATUS CODE
+        HttpClient httpclient = new DefaultHttpClient();
+        HttpGet httpget = new HttpGet(baseurl);
+        HttpResponse response = httpclient.execute(httpget);
+        StatusLine sl = response.getStatusLine();
+        int code = sl.getStatusCode();
+
+        //CHECK IF STATUS CODE IS A SUCCESS OR FAILURE CONDITION
+        if (code == 200) {
+        	status = true;
+        } else if (code == 404) {
+        	status = false;
+        }
+        return status;
+    }
+
+    //WAIT FOR PAGE ELEMENTS TO LOAD
+    public static void waitForPageLoaded(WebDriver driver) {
+        ExpectedCondition < Boolean > expectation = new
+        ExpectedCondition < Boolean > () {
+            public Boolean apply(WebDriver driver) {
+                return ((JavascriptExecutor) driver).executeScript("return document.readyState").toString().equals("complete");
+            }
+        };
+        try {
+            Thread.sleep(1000);
+            WebDriverWait wait = new WebDriverWait(driver, 30);
+            wait.until(expectation);
+        } catch (Throwable error) {
+            System.out.println("Error");
+        }
+    }
+}
