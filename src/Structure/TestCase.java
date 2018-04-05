@@ -98,8 +98,8 @@ public class TestCase {
         //ARRAY OF OBJECTS OF THE TEST CLASS
         test[] testcase = new test[110];
 
-        String filename = "jdmanage.xls";
-        String path = "/home/devteam/Documents/ExcelFiles/src/" + filename;
+        String filename = "jdmanage-addcorp.xls";
+        String path = "/home/roshni/Documents/ExcelFiles/src/" + filename;
         File file = new File(path);
 
         FileInputStream fis = new FileInputStream(file);
@@ -122,7 +122,7 @@ public class TestCase {
 
             //CREATE RESULT FILE(copy of source file) AND APPEND DATE TO THE FILE NAME
             String resultfilename = "Result_" + date + "_" + file.getName();
-            File resultfile = new File("/home/devteam/Documents/ExcelFiles/result/" + FilenameUtils.getBaseName(file.getName()) + "/" + resultfilename);
+            File resultfile = new File("/home/roshni/Documents/ExcelFiles/result/" + FilenameUtils.getBaseName(file.getName()) + "/" + resultfilename);
             FileUtils.copyFile(file, resultfile);
 
             FileInputStream resultfis = new FileInputStream(resultfile);
@@ -318,6 +318,7 @@ public class TestCase {
                                     case "input":
                                     case "label":
                                     case "a":
+                                    case "img":
                                     case "div":
                                         if ((testcase[i].field).equals("clear")) {
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
