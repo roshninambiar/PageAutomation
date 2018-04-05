@@ -88,8 +88,8 @@ public class TestCase {
 
         //SET THE DRIVER LOCATION 
 
-        System.setProperty("webdriver.chrome.driver", "/home/devteam/Documents/AllDrivers/chromedriver");
-        System.setProperty("webdriver.gecko.driver", "/home/devteam/Documents/AllDrivers/geckodriver");
+        System.setProperty("webdriver.chrome.driver", "/home/roshni/Documents/backup/AllDrivers/chromedriver");
+        System.setProperty("webdriver.gecko.driver", "/home/roshni/Documents/backup/AllDrivers/geckodriver");
         //INITIALIZE THE DRIVER
 
         //WebDriver driver = new ChromeDriver();
