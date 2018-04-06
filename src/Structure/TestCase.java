@@ -7,7 +7,7 @@ import java.io.IOException;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.concurrent.TimeUnit;
-
+	
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.http.HttpResponse;
@@ -94,11 +94,12 @@ public class TestCase {
 
         //WebDriver driver = new ChromeDriver();
         WebDriver driver = null;
-
+        JavascriptExecutor js = null ;
+        
         //ARRAY OF OBJECTS OF THE TEST CLASS
         test[] testcase = new test[110];
 
-        String filename = "jdmanage-addcorp.xls";
+        String filename = "jdmanage-product-site.xls";
         String path = "/home/roshni/Documents/ExcelFiles/src/" + filename;
         File file = new File(path);
 
@@ -202,6 +203,7 @@ public class TestCase {
                         //LOADS THE PAGE BASED ON THE STATUS CODE 
                         case "loadPage":
                             driver = new FirefoxDriver();
+                            js = (JavascriptExecutor)driver;
                             driver.manage().window().maximize();
                             boolean status = checkStatusCode(testcase[i].field);
                             System.out.println(status); //CALL THE FUNCTION TO GET THE HTTP RESPONSE CODE
@@ -234,6 +236,7 @@ public class TestCase {
                                         break;
 
                                     case "name":
+                                    	js.executeScript("window.scrollBy(0,600)");
                                         if ((driver.findElement(By.name(testcase[i].field))).isDisplayed()) {
                                             we = driver.findElement(By.name(testcase[i].field));
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
@@ -325,7 +328,8 @@ public class TestCase {
                                             we.clear();
                                         } else if ((testcase[i].field).equals("click")) {
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
-                                            we.click();
+                                            ((JavascriptExecutor)driver).executeScript("arguments[0].click();", we);
+                                            //we.click();
                                         } else if ((testcase[i].field).equals("sendkeys")) {
                                             resultsheet.getRow(next_test_case).createCell(9).setCellValue(pass);
                                             we.sendKeys(testcase[i].fieldValue);
